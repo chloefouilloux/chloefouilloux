@@ -1,0 +1,115 @@
+data("iris")
+
+install.packages("ggplot2") #you only have to do this once!
+
+library(ggplot2) #clean code tip, ALWAYS LOAD ALL YOUR PACKAGES AT THE TOP!
+
+##########
+##LEVEL 1####
+#############
+
+#basic plot
+
+ggplot(iris, aes( x= Sepal.Length, y = Sepal.Width))+
+      geom_point()
+
+##########
+##LEVEL 2
+#########
+
+#colors
+#themes
+
+
+#color by color
+ggplot(iris, aes( x= Sepal.Length, y = Sepal.Width))+
+      geom_point(color = "green")+
+      theme_bw()
+
+#color by species
+ggplot(iris, aes( x= Sepal.Length, y = Sepal.Width, color = Species))+
+      geom_point()+
+      theme_light()
+
+#color by size
+range(iris$Sepal.Length)
+
+ggplot(iris, aes( x= Sepal.Length, y = Sepal.Width, color = Sepal.Length < 5))+
+  geom_point()+
+  theme_light()
+
+###############
+###LEVEL 3#####
+###############
+
+#color by species
+#change point size
+#change color scheme
+#change transparency
+
+ggplot(iris, aes( x= Sepal.Length, y = Sepal.Width, color = Species))+
+  geom_point(size = 3, 
+             alpha = 0.8)+
+  scale_color_brewer(palette = "Pastel1", 
+                     type = qual)+ #look at different colors
+  theme_light()
+
+
+##############
+###LEVEL 4####
+############
+#https://www.datanovia.com/en/blog/ggplot-point-shapes-best-tips/
+
+#shape
+#custom color
+#relevel
+#label axes
+#change legend position
+
+ggplot(iris, aes( x= Sepal.Length, y = Sepal.Width, color = Species))+
+  geom_point(size = 3, 
+             alpha = 1, 
+             shape = 9)+
+  scale_color_brewer(palette = "Set2", 
+                     type = qual)+#look at different colors
+  xlab("Awesome")+
+  ylab("Sauce")+
+  theme_light()+
+  theme(legend.position = "bottom") #ORDER IS VERY IMPORTANT
+
+?theme()
+
+
+##LEVEL 5
+
+#custom colors
+#changing legend variable
+#boldness of points
+
+q<-ggplot(iris, aes( x= Sepal.Length, y = Sepal.Width, color = Species))+
+  geom_point(size = 3, 
+             alpha = 1, 
+             shape = 9,
+             stroke = 0.8)+
+  xlab("Awesome")+
+  ylab("Sauce")+
+  scale_y_continuous(limits = c(1.5, 4.6),
+                     breaks = seq(1, 5, 0.5))+
+  theme_light()+
+  theme(legend.position = "bottom")
+
+
+q
+
+###
+#http://sape.inf.usi.ch/quick-reference/ggplot2/colour
+#http://www.cookbook-r.com/Graphs/Legends_(ggplot2)/
+#https://encycolorpedia.pl/e69f00
+
+
+q + scale_colour_manual(values= c("#e437cc", "#6443e7", "#56B4E9"),
+                          name  ="Best Legend Ever",
+                          labels=c("Control", "Treatment 1", "Treatment 2"))
+  
+
+levels(iris$Species)
