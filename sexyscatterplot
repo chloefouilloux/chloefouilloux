@@ -1,9 +1,17 @@
-data("iris")
+## EDIT 30MARCH20 
+#I didn't realize that my iris data actually came from my dplyr package that I had already installed. 
+#Sorry if you had trouble accessing it!
+
+#So, if you want to access the iris data along with other data sets we'll be using in the future, 
+#install the package "datasets". 
 
 install.packages("ggplot2") #you only have to do this once!
+install.packages("datasets") #you only have to do this once!
 
 library(ggplot2) #clean code tip, ALWAYS LOAD ALL YOUR PACKAGES AT THE TOP!
+library(datasets)
 
+data(iris) 
 ##########
 ##LEVEL 1####
 #############
