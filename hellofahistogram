@@ -1,0 +1,137 @@
+##histograms in ggplot2
+#MAKING A HELL OF A HISTROGRAM BY CONCATONATING 2 DATAFRAMES
+
+library(datasets) ## a bunch of example datasets, yay!
+library(ggplot2)
+library(gridExtra) ##this is a cool package that let's you visualize multiple plots at once
+
+### LET'S LOOK AT THAT DATA
+data(beavers)
+?beavers
+
+##UH-OH, looks like the data was entered in different frames
+ggplot(beaver1, aes(x = time, y = activ))+
+  geom_point()+
+  theme_bw()
+
+#wtf when is this dude active?
+
+##That's okay, let's just make a new frame that combines all of the information
+##NOTE: MAKE SURE YOUR COLUMN NAMES ARE IDENTICAL
+
+beavers<- rbind(beaver1, beaver2)  ##note rbind here, not c bind
+
+##Look at observations 114 + 100, coolio, so we knoq they're all there.
+
+#If you just do this who do you know is beaver 1 and beaver 2?
+
+#AHHHH PANIC PANIC PANIC
+
+beaver1$name<- c("Ricky") ## this makes a new column, called name and all of the rows
+                          ## called Ricky
+str(beaver1) #see, now you can see it part of the data frame, yay!
+
+beaver2$name <- c("Steve")
+
+#Let's try to concatonate again
+
+beavers<- rbind(beaver1, beaver2) #nice
+
+#So from here on out, we'll just be working with the beavers dataframe
+
+#So, is Ricky only ever active at 5 am???
+
+table(beavers$name, beavers$activ) #ricky is only active at 6 observations???
+
+active<- beavers[which(beavers$activ == 1), ] ## remember [column, row]
+
+ggplot(active, aes(x = time, color = name))+
+    geom_histogram() #THIS IS A VERY MISLEADING HISTORGRAM!!! because it's stacked
+
+#color vs. fill
+ggplot(active, aes(x = time, fill = name))+
+  geom_histogram() 
+
+##right next to each other
+ggplot(active, aes(x = time, fill= name))+
+  geom_histogram(position = "dodge", 
+                 binwidth = 100)+
+  theme_bw()
+
+##one one behind the other 
+ggplot(active, aes(x = time, fill= name))+
+  geom_histogram(position = "identity", 
+                 alpha = 0.5, #transparency 
+                 binwidth = 60,
+                 color = "black")+ #outline the bars for easier visual
+  theme_bw()
+
+##so we can clearly see that one is on top of the other, 
+##remember ggplot being a canvas, yo. you gotta rearrange the order with
+## which you apply your paint! (HA! METAPHORS.)
+
+##so let's change the order of the characters by converting them to factors 
+##hopefully we get ricky on top now
+
+active$name <- as.factor(active$name)
+levels(active$name)
+active$name <- relevel(active$name, "Steve")
+
+ggplot(active, aes(x = time, fill= name))+
+  geom_histogram(position = "identity", 
+                 alpha = 1, #transparency 
+                 binwidth = 60,
+                 color = "black")+ #outline the bars for easier visual
+  theme_bw()
+
+###WHAT ABOUT FACETING???
+ggplot(active, aes(x = time, fill= name))+
+  geom_histogram(position = "identity", 
+                 alpha = 0.5, 
+                 color = "black",
+                 binwidth = 100)+
+  facet_wrap(~ name)+
+  theme_bw()
+
+##### Coolio, but what about my colors!
+##note difference between color and fill
+
+#### FINAL GRAPH, SIDE BY SIDE
+
+g<- ggplot(active, aes(x = time, color = name))+
+  geom_histogram(position = "identity",
+                 binwidth = 80,
+                 fill = "white")+
+  facet_wrap(~ name)+
+  xlab ("Time (24hrs)")+
+  ylab ("Activity Count")+
+  theme_bw()+
+  theme(legend.position = "none")
+
+g
+
+
+side<- g + scale_color_brewer(palette="Dark2") ## note color here, not fill
+
+side
+
+#### FINAL GRAPH, overlay
+q<- 
+  ggplot(active, aes(x = time, fill = name))+
+  geom_histogram(position = "identity",
+                 binwidth = 80,
+                 alpha = 0.6,
+                 color = "white")+
+  xlab ("Time (24hrs)")+
+  ylab ("Activity Count")+
+  theme_bw()
+
+q
+
+overlay<- q + scale_fill_brewer(palette="Dark2",
+                      name = "Beaver ID") ## note fill here, not color
+
+overlay
+##
+grid.arrange(side, overlay)
+
