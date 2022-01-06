@@ -1,0 +1,133 @@
+#Load you packages
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(rcartocolor)
+
+#Theme Set----
+theme_set(  theme(legend.position = "none",
+                  strip.background = element_rect(fill = "White"),
+                  panel.background = element_rect(fill = "white",
+                                                  colour = "black"), 
+                  panel.grid.major = element_line(size = 0), 
+                  panel.grid.minor = element_line(size = 0), 
+                  text = element_text(size = 14)))
+#data
+data("anscombe")
+#fuck around and see
+
+mean(anscombe$x1)
+mean(anscombe$x2)
+mean(anscombe$x3)
+mean(anscombe$y3)
+mean(anscombe$y2)
+
+#Data cleaning ####
+#but here we want to pivot longer/wider
+
+comb<-
+  anscombe %>%
+  pivot_longer(everything(),
+               #x1, x2, x3, x4, y1, y2, y3, y4
+               names_to = c(".value", "set"), 
+               ###.value gets transformed into variable###
+               #this tells pivot_longer() that that part of the
+               #column name specifies the “value” being measured, 
+               # which will become a variable in the output
+               #`.value` indicates that component of the name defines the name 
+               #of the column containing the cell values
+               names_pattern = "(.)(.)", 
+               names_transform = list(set = as.factor)) 
+
+df.means <- aggregate(y ~ set, comb, mean)
+
+##############
+#Level 1 ####
+##############
+ggplot(df.means, aes(x= set, y = y , fill = set)) +
+  geom_bar(stat="identity", position="dodge")
+
+##############
+#Level 2 ####
+##############
+ggplot() +
+  geom_bar(data = df.means, aes(y=y, x = set, fill = set),
+           stat="identity", position="dodge") +
+  geom_point(data = comb, aes(x = set, y = y), shape = 21) +
+  geom_point(data = df.means, aes(y = y, x = set, fill = set),
+             size = 3, color = "red")
+
+#Let's get these bars out of here ;-)
+ggplot() +
+  geom_boxplot(data = comb, aes(x = set, y = y))+
+  geom_point(data = comb, aes(x = set, y = y), shape = 21)+
+  geom_point(data = df.means, aes(y=y, x = set, fill = set),
+             size = 3, color = "red")
+
+
+##############
+#Level 3 ####
+##############
+
+#Part A
+#Introduce stroke
+#Introduce jitter
+ggplot(comb, aes(x = set, y = y))+
+  geom_jitter(shape = 21, aes(color = set), 
+              stroke = 1.5,
+              alpha = 0.8,
+              height = 0.05, width = 0.08) +
+  scale_color_carto_d(palette = "Sunset") + #Add some cute color
+  geom_hline(yintercept = 10, linetype = "dashed", color = "black") 
+  #Let's emphasize the outliers
+
+#Part B
+#Add stat summary
+
+ggplot(comb, aes(x = set, y = y))+
+  geom_jitter(shape = 21, aes(color = set), 
+              stroke = 1.5,
+              alpha = 0.8,
+              height = 0.05, width = 0.08)+
+  stat_summary(fun.data = mean_cl_boot,
+               #fun.data  = median_hilow,
+               shape = 21, 
+               fill = "white",
+               size = 1)+ 
+  scale_color_carto_d(palette = "Sunset") +
+  geom_hline(yintercept = 10, linetype = "dashed", color = "black")
+
+
+#Part C
+#Add a rectangle to further highlight information
+
+ggplot(comb, aes(x = set, y = y))+
+  annotate(geom = "rect", 
+           xmin = -Inf, xmax = Inf, 
+           ymin = 10, ymax = Inf, 
+           color = "lightgrey", 
+           fill = "black",
+           alpha = 0.05)+
+  geom_jitter(shape = 21, aes(color = set), 
+              stroke = 1.5,
+              alpha = 0.8,
+              height = 0.05, width = 0.08)+
+  stat_summary(fun.data = mean_cl_boot,
+               #fun.data  = median_hilow,
+               shape = 21, 
+               fill = "white",
+               size = 1)+ 
+  scale_color_carto_d(palette = "Sunset") +
+  geom_hline(yintercept = 10, linetype = "dashed", color = "black")
+    
+#THE GREAT REVEAL####
+#ANSCOMBE'S QUARTET BASED ON SET.
+#Let's get this party started
+
+ggplot(comb, aes(x= x, y = y, fill = set))+
+  geom_point(size = 3, shape = 21)+
+  facet_wrap(~ set)+
+  scale_fill_carto_d(palette ="Teal")
+
+
+
